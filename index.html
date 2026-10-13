@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodieHub - Food Ordering</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #fff8f0;
+  color: #333;
+}
+
+header {
+  background: #ff5722;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header a {
+  color: white;
+  text-decoration: none;
+}
+
+.hero {
+  text-align: center;
+  padding: 45px 15px;
+  background: #ffe0cc;
+}
+
+.hero h2 {
+  margin-bottom: 12px;
+}
+
+.hero input {
+  padding: 12px;
+  width: 85%;
+  max-width: 400px;
+  margin-top: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.container {
+  padding: 25px 5%;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+button {
+  background: #ff5722;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.categories button {
+  background: #ddd;
+  color: #333;
+}
+
+.categories button.active {
+  background: #ff5722;
+  color: white;
+}
+
+.menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.food-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  padding-bottom: 18px;
+  box-shadow: 0 3px 10px #0001;
+}
+
+.food-card img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+}
+
+.food-card h3 {
+  margin: 12px;
+}
+
+.food-card p {
+  color: #ff5722;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.cart {
+  margin-top: 35px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.cart h2 {
+  margin-bottom: 15px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.total {
+  font-size: 21px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.checkout input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+footer {
+  background: #333;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+@media(max-width: 450px) {
+  header h1 {
+    font-size: 22px;
+  }
+
+  .cart-item {
+    flex-wrap: wrap;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🍔 FoodieHub</h1>
+  <a href="#cart">🛒 Cart (<span id="count">0</span>)</a>
+</header>
+
+<section class="hero">
+  <h2>Delicious Food, Delivered Fresh!</h2>
+  <p>Order your favourite food online.</p>
+  <input id="search" type="text" placeholder="Search food...">
+</section>
+
+<main class="container">
+  <h2>Our Food Menu</h2>
+
+  <div class="categories">
+    <button class="active" onclick="filterFood('All',this)">All</button>
+    <button onclick="filterFood('Pizza',this)">Pizza</button>
+    <button onclick="filterFood('Burger',this)">Burger</button>
+    <button onclick="filterFood('Indian',this)">Indian</button>
+    <button onclick="filterFood('Drinks',this)">Drinks</button>
+  </div>
+
+  <div class="menu" id="menu"></div>
+
+  <section class="cart" id="cart">
+    <h2>🛒 Your Cart</h2>
+    <div id="cartItems">Your cart is empty.</div>
+
+    <div class="total">
+      Total: ₹<span id="total">0</span>
+    </div>
+
+    <div class="checkout">
+      <h3>Checkout</h3>
+      <input id="customer" placeholder="Your name">
+      <input id="address" placeholder="Delivery address">
+      <button onclick="placeOrder()">Place Order</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 FoodieHub | College Project</p>
+</footer>
+
+<script>
+const foods = [
+  {
+    id: 1,
+    name: "Margherita Pizza",
+    category: "Pizza",
+    price: 199,
+    image: "https://images.unsplash.com/photo-1579751626657-72bc17010498?w=500"
+  },
+  {
+    id: 2,
+    name: "Cheese Burger",
+    category: "Burger",
+    price: 129,
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500"
+  },
+  {
+    id: 3,
+    name: "Veg Biryani",
+    category: "Indian",
+    price: 179,
+    image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=500"
+  },
+  {
+    id: 4,
+    name: "French Fries",
+    category: "Burger",
+    price: 89,
+    image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500"
+  },
+  {
+    id: 5,
+    name: "Cold Coffee",
+    category: "Drinks",
+    price: 99,
+    image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500"
+  },
+  {
+    id: 6,
+    name: "Farmhouse Pizza",
+    category: "Pizza",
+    price: 249,
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500"
+  }
+];
+
+let cart = [];
+let currentCategory = "All";
+
+function displayFoods() {
+  const search = document.getElementById("search")
+    .value.toLowerCase();
+
+  const filtered = foods.filter(food =>
+    (currentCategory === "All" ||
+     food.category === currentCategory) &&
+    food.name.toLowerCase().includes(search)
+  );
+
+  const menu = document.getElementById("menu");
+
+  if (filtered.length === 0) {
+    menu.innerHTML = "<p>No food found.</p>";
+    return;
+  }
+
+  menu.innerHTML = filtered.map(food => `
+    <div class="food-card">
+      <img
+        src="${food.image}"
+        alt="${food.name}"
+        onerror="this.onerror=null;this.alt='Image unavailable';this.style.height='170px';this.style.objectFit='contain';this.style.background='#ffe0cc';this.src='https://placehold.co/500x300/ffe0cc/333333?text=Image+Unavailable'">
+
+      <h3>${food.name}</h3>
+      <p>₹${food.price}</p>
+      <button onclick="addToCart(${food.id})">
+        Add to Cart
+      </button>
+    </div>
+  `).join("");
+}
+
+function filterFood(category, button) {
+  currentCategory = category;
+
+  document.querySelectorAll(".categories button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  button.classList.add("active");
+  displayFoods();
+}
+
+function addToCart(id) {
+  const item = cart.find(food => food.id === id);
+
+  if (item) {
+    item.quantity++;
+  } else {
+    const food = foods.find(food => food.id === id);
+    cart.push({...food, quantity: 1});
+  }
+
+  displayCart();
+}
+
+function changeQuantity(id, amount) {
+  const item = cart.find(food => food.id === id);
+
+  if (!item) return;
+
+  item.quantity += amount;
+
+  if (item.quantity <= 0) {
+    cart = cart.filter(food => food.id !== id);
+  }
+
+  displayCart();
+}
+
+function displayCart() {
+  const cartItems = document.getElementById("cartItems");
+
+  const count = cart.reduce(
+    (sum, item) => sum + item.quantity, 0
+  );
+
+  document.getElementById("count").textContent = count;
+
+  if (cart.length === 0) {
+    cartItems.innerHTML = "Your cart is empty.";
+  } else {
+    cartItems.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <span>
+          ${item.name}<br>
+          ₹${item.price} × ${item.quantity}
+        </span>
+        <span>
+          <button onclick="changeQuantity(${item.id},-1)">−</button>
+          <button onclick="changeQuantity(${item.id},1)">+</button>
+        </span>
+      </div>
+    `).join("");
+  }
+
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity, 0
+  );
+
+  document.getElementById("total").textContent = total;
+}
+
+function placeOrder() {
+  const name = document.getElementById("customer")
+    .value.trim();
+
+  const address = document.getElementById("address")
+    .value.trim();
+
+  if (cart.length === 0) {
+    alert("Please add food to your cart!");
+    return;
+  }
+
+  if (!name || !address) {
+    alert("Please enter your name and address.");
+    return;
+  }
+
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity, 0
+  );
+
+  alert(
+    "Thank you, " + name +
+    "! Your demo order is placed.\n" +
+    "Address: " + address +
+    "\nTotal: ₹" + total
+  );
+
+  cart = [];
+  displayCart();
+
+  document.getElementById("customer").value = "";
+  document.getElementById("address").value = "";
+}
+
+document.getElementById("search")
+  .addEventListener("input", displayFoods);
+
+displayFoods();
+displayCart();
+</script>
+
+</body>
+</html>
